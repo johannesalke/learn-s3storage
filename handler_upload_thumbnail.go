@@ -1,12 +1,16 @@
 package main
 
 import (
-	"encoding/base64"
+	//"encoding/base64"
 	"fmt"
 	"github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/auth"
 	"github.com/google/uuid"
 	"io"
 	"net/http"
+	"os"
+	//"path/filepath"
+	"mime"
+	"strings"
 )
 
 func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Request) {
@@ -45,14 +49,17 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	//mediaType := r.Header.Get("Content-Type")
-	mediaType := fileHeader.Header.Get("Content-Type")
 
-	var imgData []byte
-	imgData, err = io.ReadAll(file)
+	parsedContentType, _, err := mime.ParseMediaType(fileHeader.Header.Get("Content-Type"))
 	if err != nil {
-		respondWithError(w, 400, "Error reading img data", err)
+		respondWithError(w, 400, "Error parsing content type", err)
 		return
 	}
+	if parsedContentType != "image/png" && parsedContentType != "image/jpeg" {
+		respondWithError(w, 400, "Wrong file type for a thumbnail", nil)
+	}
+
+	mediaType := strings.Split(parsedContentType, "/")[1]
 
 	dbVideo, err := cfg.db.GetVideo(videoID)
 	if err != nil {
@@ -65,11 +72,20 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	thmbnl := thumbnail{data: imgData, mediaType: mediaType}
-	videoThumbnails[videoID] = thmbnl
+	//thmbnl := thumbnail{data: imgData, mediaType: mediaType}
+	//videoThumbnails[videoID] = thmbnl
+
+	//imgStr := base64.StdEncoding.EncodeToString(imgData)
+	//thumbnailString := fmt.Sprintf("data:%s;base64,%s", mediaType, imgStr)
+	thumbnailFilepath := fmt.Sprintf("%s/%s.%s", cfg.assetsRoot, videoID.String(), mediaType)
+	filePtr, err := os.Create(thumbnailFilepath)
+	if err != nil {
+		respondWithError(w, 400, "Error creating thumbnail file on disk", err)
+	}
+	io.Copy(filePtr, file)
 
 	//var thumbnailURL *string
-	thumbnailURL := fmt.Sprintf("http://localhost:%s/api/thumbnails/%s", cfg.port, videoID)
+	thumbnailURL := fmt.Sprintf("http://localhost:%s/assets/%s.%s", cfg.port, videoID, mediaType)
 	dbVideo.ThumbnailURL = &thumbnailURL
 	cfg.db.UpdateVideo(dbVideo)
 
