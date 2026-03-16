@@ -92,7 +92,7 @@ func (cfg *apiConfig) handlerUploadVideo(w http.ResponseWriter, r *http.Request)
 	cfg.s3Client.PutObject(context.Background(), &objectInput)
 
 	//Update db video object so it points at the new aws location of the video.
-	videoURL := fmt.Sprintf("https://%s,.s3.%s.amazonaws.com/%s.mp4", cfg.s3Bucket, cfg.s3Region, vidKey)
+	videoURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", cfg.s3Bucket, cfg.s3Region, vidKey)
 	dbVideo.VideoURL = &videoURL
 	cfg.db.UpdateVideo(dbVideo)
 
