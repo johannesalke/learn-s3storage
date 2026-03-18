@@ -1,14 +1,19 @@
 package main
 
 import (
+	//"bytes"
+	//"encoding/json"
+	//"fmt"
 	"log"
 	"net/http"
 	"os"
+	//"os/exec"
 
 	"github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/database"
 	//"github.com/google/uuid"
 
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/joho/godotenv"
