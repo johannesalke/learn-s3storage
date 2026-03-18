@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"context"
 	"fmt"
@@ -43,3 +44,5 @@ func (cfg *apiConfig) dbVideoToSignedVideo(video database.Video) (database.Video
 	return video, nil
 
 }
+
+*/

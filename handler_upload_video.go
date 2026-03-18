@@ -131,8 +131,8 @@ func (cfg *apiConfig) handlerUploadVideo(w http.ResponseWriter, r *http.Request)
 	}
 
 	//Update db video object so it points at the new aws location of the video.
-	//videoURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", cfg.s3Bucket, cfg.s3Region, vidKey)
-	videoURL := cfg.s3Bucket + "," + vidKey
+	videoURL := fmt.Sprintf("https://%s/%s", cfg.s3CfDistribution, vidKey)
+	//videoURL := cfg.s3Bucket + "," + vidKey
 	dbVideo.VideoURL = &videoURL
 	err = cfg.db.UpdateVideo(dbVideo)
 	if err != nil {
@@ -140,13 +140,15 @@ func (cfg *apiConfig) handlerUploadVideo(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	/*  //Leftover from when presigned urls were used to grand database access.
 	video, err := cfg.dbVideoToSignedVideo(dbVideo)
 	if err != nil {
 		respondWithError(w, 400, "", err)
 		return
-	}
-	respondWithJSON(w, http.StatusOK, video)
-	return
+	}*/
+
+	respondWithJSON(w, http.StatusOK, dbVideo)
+
 }
 
 func getVideoAspectRatio(filePath string) (string, error) {
