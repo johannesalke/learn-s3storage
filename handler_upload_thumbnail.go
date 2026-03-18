@@ -79,7 +79,7 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 
 	//imgStr := base64.StdEncoding.EncodeToString(imgData)
 	//thumbnailString := fmt.Sprintf("data:%s;base64,%s", mediaType, imgStr)
-	thumbnailRNG := make([]byte, 32, 32)
+	thumbnailRNG := make([]byte, 32)
 	rand.Read(thumbnailRNG)
 	thumbnailID := base64.RawURLEncoding.EncodeToString(thumbnailRNG)
 

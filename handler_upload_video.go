@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	//"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/auth"
@@ -130,14 +131,22 @@ func (cfg *apiConfig) handlerUploadVideo(w http.ResponseWriter, r *http.Request)
 	}
 
 	//Update db video object so it points at the new aws location of the video.
-	videoURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", cfg.s3Bucket, cfg.s3Region, vidKey)
+	//videoURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", cfg.s3Bucket, cfg.s3Region, vidKey)
+	videoURL := cfg.s3Bucket + "," + vidKey
 	dbVideo.VideoURL = &videoURL
-	cfg.db.UpdateVideo(dbVideo)
+	err = cfg.db.UpdateVideo(dbVideo)
 	if err != nil {
 		respondWithError(w, 400, "Error updating db", err)
 		return
 	}
 
+	video, err := cfg.dbVideoToSignedVideo(dbVideo)
+	if err != nil {
+		respondWithError(w, 400, "", err)
+		return
+	}
+	respondWithJSON(w, http.StatusOK, video)
+	return
 }
 
 func getVideoAspectRatio(filePath string) (string, error) {
